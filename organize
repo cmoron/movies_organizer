@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# Script that parse a movies directory and hunt alone files.
+# Creates directories for every alone file and move this file into his directory.
+# Mainly used to bring together movies and srt files into one and only directory.
+
+set -o errexit
+set -o pipefail
+
 PROGRAME_NAME=$(basename "$0")
 
 usage() {
@@ -8,7 +15,7 @@ usage() {
 }
 
 error() {
-    echo "Error: $1"
+    echo "Error: $1" 1>&2
     usage
     exit 1
 }
@@ -22,7 +29,16 @@ main() {
 
     for elem in "$movies_dir"/*; do
         if [[ -f "$elem" ]]; then
-            basename "$elem"
+            bname=$(basename "$elem")
+            dir="${bname%.*}"
+
+            if [[ ! -e "$dir" ]]; then
+                mkdir "${movies_dir}/${dir}"
+            fi
+
+            if [[ ! -f "$dir" ]]; then
+                mv "${movies_dir}/${bname}" "${movies_dir}/${dir}"
+            fi
         fi
     done
 }
